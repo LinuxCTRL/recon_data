@@ -8,13 +8,14 @@ if [ -z "$DOMAIN" ]; then
   exit 1
 fi
 
-REPO_DIR="$HOME/Documents/recon-data"
+REPO_DIR="/home/soufiane/work/bbh/recon_data"
+BIN_DIR="/home/soufiane/work/bbh/bin"
 mkdir -p "$REPO_DIR/$DOMAIN"
 
-echo "[+] Starting recon for $DOMAIN inside Hack3r container"
+echo "[+] Starting recon for $DOMAIN"
 
-# Run recon tools inside the distrobox container
-distrobox enter Hack3r -- sh -c "subfinder -d $DOMAIN -silent | httpx-pd -silent" > "$REPO_DIR/$DOMAIN/live_subdomains.txt"
+# Run recon tools using local binaries
+"$BIN_DIR/subfinder" -d "$DOMAIN" -silent | "$BIN_DIR/httpx" -silent > "$REPO_DIR/$DOMAIN/live_subdomains.txt"
 
 COUNT=$(wc -l < "$REPO_DIR/$DOMAIN/live_subdomains.txt")
 SIZE=$(du -h "$REPO_DIR/$DOMAIN/live_subdomains.txt" | cut -f1)
@@ -29,7 +30,7 @@ jq --arg dom "$DOMAIN" --arg count "$COUNT" --arg size "$SIZE" --arg time "$TIME
      map(if .domain == $dom then . + {count: $count, size: $size, updated_at: $time} else . end)
    else 
      . + [{domain: $dom, count: $count, size: $size, updated_at: $time}]
-   end' "$HOME/Documents/recon-data/index.json" > "$HOME/Documents/recon-data/index.json.tmp" && mv "$HOME/Documents/recon-data/index.json.tmp" "$HOME/Documents/recon-data/index.json"
+   end' "$REPO_DIR/index.json" > "$REPO_DIR/index.json.tmp" && mv "$REPO_DIR/index.json.tmp" "$REPO_DIR/index.json"
 
 # Git operations
 cd "$REPO_DIR"
