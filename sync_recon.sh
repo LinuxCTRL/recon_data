@@ -15,7 +15,10 @@ mkdir -p "$REPO_DIR/$DOMAIN"
 echo "[+] Starting recon for $DOMAIN"
 
 # Run recon tools using local binaries
-"$BIN_DIR/subfinder" -d "$DOMAIN" -silent | "$BIN_DIR/httpx" -silent > "$REPO_DIR/$DOMAIN/live_subdomains.txt"
+"$BIN_DIR/subfinder" -d "$DOMAIN" -silent | "$BIN_DIR/httpx" -silent -sc -title -td -j > "$REPO_DIR/$DOMAIN/subdomains.json"
+
+# Extract simple list for backward compatibility
+jq -r '.url' "$REPO_DIR/$DOMAIN/subdomains.json" > "$REPO_DIR/$DOMAIN/live_subdomains.txt"
 
 COUNT=$(wc -l < "$REPO_DIR/$DOMAIN/live_subdomains.txt")
 SIZE=$(du -h "$REPO_DIR/$DOMAIN/live_subdomains.txt" | cut -f1)
